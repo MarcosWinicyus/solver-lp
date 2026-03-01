@@ -167,17 +167,22 @@ def feasible_region_3d(c: List[float], A: List[List[float]], b: List[float], opt
     
     x, y, z = vertices.T
     
-    # Mesh 3D com variação de cor (depth perception)
+    # Mesh 3D com gradiente baseado no valor da FO (frio→quente)
+    # Calcular Z = c·x para cada vértice
+    c_np = np.array(c)
+    z_values = np.array([np.dot(c_np, v) for v in vertices])
+    
     if len(vertices) >= 4:
         fig.add_trace(go.Mesh3d(
             x=x, y=y, z=z,
             alphahull=0,
-            intensity=z, # Colorir baseado na altura Z para dar noção de 3D
-            colorscale='Spectral_r', # Cor mais rica
+            intensity=z_values,  # Colorir baseado no valor de Z (FO)
+            colorscale=[[0, '#0d47a1'], [0.3, '#1976d2'], [0.5, '#4fc3f7'], [0.7, '#ffb74d'], [0.9, '#ff8f00'], [0.95, '#ff6f00'], [1, '#d50000']],  # Vermelho só no ponto mais quente
             opacity=0.7,
             name=t("tableau.results.feasible_region"),
             flatshading=True,
-            showscale=False,
+            showscale=True,
+            colorbar=dict(title="Z", len=0.5),
             lighting=dict(ambient=0.4, diffuse=0.5, roughness=0.1, specular=1.0, fresnel=1.0)
         ))
     
