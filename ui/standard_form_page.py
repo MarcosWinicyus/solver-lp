@@ -2,16 +2,16 @@ import streamlit as st
 import pandas as pd
 from typing import List
 
-from .helpers import number_emojis
+from .helpers import number_emojis, render_md_bold
 from ui.lang import t
 
 def standard_form_ui():
     st.markdown(f"<h1 style='text-align: center;'>{t('standard.title')}</h1>", unsafe_allow_html=True)
     st.markdown(f"""
     <div style='text-align: center;'>
-        {t('standard.subtitle')}
+        {render_md_bold(t('standard.subtitle'))}
         <br>
-        {t('standard.subtitle_details')}
+        {render_md_bold(t('standard.subtitle_details'))}
     </div>
     """, unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
@@ -34,12 +34,35 @@ def standard_form_ui():
 
     # --- Inputs ---
     st.markdown(t("sensitivity.func_obj"))
+    
+    # Variable type options
+    type_options = [t("simplex.var_real"), t("simplex.var_integer"), t("simplex.var_binary")]
+    saved_var_types = saved.get("var_types", [])
+    vt_map = {"real": 0, "integer": 1, "binary": 2}
+    
     cols_obj = st.columns(n_vars)
     c = []
+    var_types = []
     for i in range(n_vars):
         val = sv_c[i] if i < len(sv_c) else 0.0
         with cols_obj[i]:
-            c.append(st.number_input(f"**x{i+1}**", value=val, key=f"std_c_{i}", help=f"{t('simplex.coef_help')} x{i+1}"))
+            # Default type from saved
+            default_type_idx = vt_map.get(saved_var_types[i], 0) if i < len(saved_var_types) else 0
+            vtype = st.selectbox(
+                f"{t('simplex.var_type')} x{i+1}",
+                type_options,
+                index=default_type_idx,
+                key=f"std_vtype_{i}",
+                label_visibility="collapsed"
+            )
+            var_types.append(vtype)
+            
+            if vtype == t("simplex.var_binary"):
+                c.append(st.number_input(f"**x{i+1}**", min_value=0.0, max_value=1.0, value=min(max(val, 0.0), 1.0), step=1.0, key=f"std_c_{i}", help=f"{t('simplex.coef_help')} x{i+1}"))
+            elif vtype == t("simplex.var_integer"):
+                c.append(st.number_input(f"**x{i+1}**", value=float(round(val)), step=1.0, key=f"std_c_{i}", help=f"{t('simplex.coef_help')} x{i+1}"))
+            else:
+                c.append(st.number_input(f"**x{i+1}**", value=val, key=f"std_c_{i}", help=f"{t('simplex.coef_help')} x{i+1}"))
 
     # Inputs de Restrições
     A = []
@@ -74,23 +97,70 @@ def standard_form_ui():
     st.markdown("---")
 
     if st.button(t("standard.btn_convert"), type="primary", width="stretch"):
-        st.divider()
-
         # --- Lógica de Conversão ---
         new_c = list(c)
         new_A = [row[:] for row in A]
         new_b = list(b)
         new_vars = [f"x_{{{i+1}}}" for i in range(n_vars)]
         steps = []
+        conv_senses = list(senses)
         
         # Passo 1: Objetivo
-        is_min = (obj_type == t("simplex_minimize")) # FIXME: Check if this string matches exactly or use boolean logic from index
-        # Better logic:
         is_min = (obj_type == t("simplex.minimize"))
 
         if is_min:
             new_c = [-val for val in new_c]
             steps.append(t("standard.msg.min_to_max"))
+        
+        # Passo 1.5: Variáveis com domínio não-padrão (do Dual)
+        # Processar variáveis livres (y = y⁺ - y⁻) e ≤ 0 (y' = -y)
+        dual_domains = saved.get("dual_vars_domain", [])
+        if dual_domains:
+            # Processar da direita para esquerda para não alterar índices
+            for i in range(len(dual_domains) - 1, -1, -1):
+                if i >= len(new_c):
+                    continue
+                    
+                dom = dual_domains[i]
+                var_name = new_vars[i]
+                
+                if dom == "Livre":
+                    # Variável livre: substituir y_i por y_i⁺ - y_i⁻
+                    # Duplicar coluna com sinal invertido
+                    pos_name = f"{var_name}^+"
+                    neg_name = f"{var_name}^-"
+                    
+                    # Substituir nome da variável original por y⁺
+                    new_vars[i] = pos_name
+                    # Inserir y⁻ logo após
+                    new_vars.insert(i + 1, neg_name)
+                    
+                    # Coeficiente na FO: c_i para y⁺, -c_i para y⁻
+                    c_val = new_c[i]
+                    new_c.insert(i + 1, -c_val)
+                    
+                    # Nas restrições: a_ij para y⁺, -a_ij para y⁻
+                    for row in new_A:
+                        if i < len(row):
+                            row.insert(i + 1, -row[i])
+                        else:
+                            row.insert(i + 1, 0.0)
+                    
+                    steps.append(t("standard.msg.free_var").format(var_name))
+                    
+                elif dom == "≤ 0":
+                    # Variável ≤ 0: substituir y_i por y_i' = -y_i
+                    new_vars[i] = f"{var_name}'"
+                    
+                    # Negar coeficiente na FO
+                    new_c[i] = -new_c[i]
+                    
+                    # Negar coluna nas restrições
+                    for row in new_A:
+                        if i < len(row):
+                            row[i] = -row[i]
+                    
+                    steps.append(t("standard.msg.neg_var").format(var_name))
         
         # Passo 2: RHS Negativo
         for i in range(n_cons):
@@ -99,14 +169,14 @@ def standard_form_ui():
                 new_A[i] = [-val for val in new_A[i]]
                 
                 # Inverter desigualdade
-                if senses[i] == "≤":
-                    senses[i] = "≥"
+                if conv_senses[i] == "≤":
+                    conv_senses[i] = "≥"
                     steps.append(t("standard.msg.rhs_neg").format(i+1))
-                elif senses[i] == "≥":
-                    senses[i] = "≤"
-                    steps.append(t("standard.msg.rhs_neg").format(i+1)) # Same message structure handles both? No, message says "sign inverted".
+                elif conv_senses[i] == "≥":
+                    conv_senses[i] = "≤"
+                    steps.append(t("standard.msg.rhs_neg").format(i+1))
                 else:
-                    steps.append(t("standard.msg.rhs_neg_simple").format(i+1)) # For equality
+                    steps.append(t("standard.msg.rhs_neg_simple").format(i+1))
 
         # Passo 3: Variáveis de Folga e Excesso
         for i in range(n_cons):
@@ -116,25 +186,21 @@ def standard_form_ui():
             while len(row) < len(new_vars):
                 row.append(0.0)
                 
-            if senses[i] == "≤":
-                # Adicionar Folga (+s)
+            if conv_senses[i] == "≤":
                 slack_name = f"s_{{{i+1}}}"
                 new_vars.append(slack_name)
                 
-                # Adicionar 1.0 nesta restrição e 0.0 nas outras
                 for r_idx in range(n_cons):
                     if r_idx == i:
                         new_A[r_idx].append(1.0)
                     else:
-                        if r_idx < len(new_A): # Check safety
+                        if r_idx < len(new_A):
                             new_A[r_idx].append(0.0)
                 
-                # Custo 0 na objetivo
                 new_c.append(0.0)
                 steps.append(t("standard.msg.slack").format(i+1, slack_name))
                 
-            elif senses[i] == "≥":
-                # Adicionar Excesso (-e)
+            elif conv_senses[i] == "≥":
                 surplus_name = f"e_{{{i+1}}}"
                 new_vars.append(surplus_name)
                 
@@ -147,6 +213,34 @@ def standard_form_ui():
                 new_c.append(0.0)
                 steps.append(t("standard.msg.surplus").format(i+1, surplus_name))
         
+        # Salvar resultado no session state para persistência
+        st.session_state["std_form_result"] = {
+            "new_c": new_c,
+            "new_A": new_A,
+            "new_b": new_b,
+            "new_vars": new_vars,
+            "steps": steps,
+            "is_min": is_min,
+            "c_original": c,
+            "A_original": A,
+            "b_original": b,
+            "senses_original": senses,
+            "obj_type": obj_type,
+            "n_cons": n_cons,
+        }
+
+    # --- Exibição do Resultado (Persistente via session state) ---
+    if "std_form_result" in st.session_state:
+        res = st.session_state["std_form_result"]
+        new_c = res["new_c"]
+        new_A = res["new_A"]
+        new_b = res["new_b"]
+        new_vars = res["new_vars"]
+        steps = res["steps"]
+        is_min = res["is_min"]
+        
+        st.divider()
+        
         if steps:
             with st.expander(t("standard.details"), expanded=False):
                 for step in steps:
@@ -158,27 +252,23 @@ def standard_form_ui():
         with c1:
             st.subheader(t("standard.original"))
             
-            # Objetivo
-            original_obj_str = " + ".join([f"{val}x_{{{i+1}}}" for i, val in enumerate(c)])
+            original_obj_str = " + ".join([f"{val}x_{{{i+1}}}" for i, val in enumerate(res["c_original"])])
             original_obj_str = original_obj_str.replace("+ -", "- ")
-            # Use strict slicing for latex text
-            obj_tag = "Max" if obj_type == t("simplex.maximize") else "Min"
+            obj_tag = "Max" if res["obj_type"] == t("simplex.maximize") else "Min"
             st.latex(f"\\text{{{obj_tag}}} \\ Z = {original_obj_str}")
             
-            # Restrições
             st.markdown(t("standard.subject_to"))
             orig_latex_lines = []
-            for i in range(n_cons):
-                lhs = " + ".join([f"{val}x_{{{j+1}}}" for j, val in enumerate(A[i])]).replace("+ -", "- ")
-                op = "=" if senses[i] == "=" else ("\\le" if senses[i] == "≤" else "\\ge")
-                orig_latex_lines.append(f"{lhs} {op} {b[i]}")
+            for i in range(res["n_cons"]):
+                lhs = " + ".join([f"{res['A_original'][i][j]}x_{{{j+1}}}" for j in range(len(res['c_original']))]).replace("+ -", "- ")
+                op = "=" if res['senses_original'][i] == "=" else ("\\le" if res['senses_original'][i] == "≤" else "\\ge")
+                orig_latex_lines.append(f"{lhs} {op} {res['b_original'][i]}")
             
             st.latex("\\begin{cases} " + " \\\\ ".join(orig_latex_lines) + " \\\\ x_j \\ge 0 \\end{cases}")
 
         with c2:
             st.subheader(t("standard.standard"))
             
-            # Objetivo Standard
             std_obj_str = " + ".join([f"{val} {var}" for val, var in zip(new_c, new_vars) if abs(val) > 1e-9])
             if not std_obj_str: std_obj_str = "0"
             std_obj_str = std_obj_str.replace("+ -", "- ")
@@ -186,12 +276,10 @@ def standard_form_ui():
             obj_label = "W" if is_min else "Z"
             st.latex(f"\\text{{Max}} \\ {obj_label} = {std_obj_str}")
             
-            # Restrições Standard
             st.markdown(t("standard.subject_to"))
             
             std_latex_lines = []
-            for i in range(n_cons):
-                # Re-pad rows if needed (though loop above should handle it)
+            for i in range(res["n_cons"]):
                 current_row = new_A[i]
                 while len(current_row) < len(new_vars):
                     current_row.append(0.0)
@@ -205,6 +293,41 @@ def standard_form_ui():
                 std_latex_lines.append(f"{lhs_std} = {new_b[i]}")
             
             st.latex("\\begin{cases} " + " \\\\ ".join(std_latex_lines) + " \\\\ x_j, s_i, e_i \\ge 0 \\end{cases}")
+        
+        # --- Botões de Resolução ---
+        st.divider()
+        st.markdown(t("duality.solve_label"))
+        
+        # Derive var_types as internal strings
+        vt_internal = [("real" if vt == t("simplex.var_real") else "integer" if vt == t("simplex.var_integer") else "binary") for vt in var_types]
+        int_var_indices = [i for i, vt in enumerate(vt_internal) if vt in ("integer", "binary")]
+        
+        std_problem_data = {
+            "c": new_c,
+            "A": new_A, 
+            "b": new_b,
+            "maximize": True,
+            "int_vars": int_var_indices,
+            "var_types": vt_internal
+        }
+        
+        col_simplex, col_bab = st.columns(2)
+        with col_simplex:
+            if st.button(t("duality.btn_solve_simplex"), type="primary", key="btn_std_solve_simplex"):
+                from ui.library_page import load_problem_and_redirect
+                load_problem_and_redirect({
+                    "title": "Forma Padrão",
+                    "target_page": "simplex",
+                    "data": std_problem_data
+                })
+        with col_bab:
+            if st.button(t("duality.btn_solve_bb"), type="primary", key="btn_std_solve_bab"):
+                from ui.library_page import load_problem_and_redirect
+                load_problem_and_redirect({
+                    "title": "Forma Padrão",
+                    "target_page": "bab",
+                    "data": std_problem_data
+                })
         
     # --- Rodapé ---
     st.markdown("---")

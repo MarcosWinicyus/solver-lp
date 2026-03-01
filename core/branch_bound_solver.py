@@ -106,6 +106,7 @@ class BranchBoundSolver:
             # Se podado, apenas retornamos True para tentar o próximo na próxima chamada
             # Mas marcamos como processado se não estava
             node["processed"] = True
+            node["pruned"] = True
             return True
             
         node["processed"] = True
@@ -167,6 +168,9 @@ class BranchBoundSolver:
             # Enfileira nós fracionários promissores
             elif not new_node["integer_feasible"] and sub_val > self.best_value:
                 self.queue.append(self.next_id)
+            else:
+                # Nó não é inteiro e bound <= best_value → podado por qualidade
+                new_node["pruned"] = True
 
             self.next_id += 1
             

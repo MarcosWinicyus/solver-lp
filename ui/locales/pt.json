@@ -71,6 +71,11 @@
         "coef_help": "Coeficiente da variável",
         "rhs_label": "**Valor**",
         "type_label": "**Tipo**",
+        "var_type": "Tipo",
+        "var_real": "Real",
+        "var_integer": "Inteiro",
+        "var_binary": "Binário",
+        "auto_bab_info": "Variáveis inteiras/binárias detectadas. O problema será resolvido com **Branch & Bound** para garantir a integralidade da solução.",
         "results": {
             "unbounded": "⚠️ **Problema Ilimitado** - A função objetivo pode crescer infinitamente",
             "infeasible": "❌ **Não foi possível encontrar solução ótima** (Inviável)",
@@ -183,7 +188,9 @@
         "btn_solve_simplex": "📐 Resolver no Simplex",
         "btn_solve_bb": "🌳 Resolver no B&B",
         "primal": "Primal",
-        "dual": "Dual"
+        "dual": "Dual",
+        "not_standard_form": "⚠️ O problema Dual possui variáveis com domínio **≤ 0** ou **livres (irrestritas)**, portanto **não está na Forma Padrão**. É necessário convertê-lo antes de resolver com o Simplex.",
+        "btn_convert_std": "📝 Converter para Forma Padrão"
     },
     "sensitivity": {
         "title": "📊 Análise de Sensibilidade",
@@ -224,7 +231,9 @@
             "rhs_neg": "⚠️ **R{0}:** RHS negativo. Multiplicada por -1 e sinal invertido.",
             "rhs_neg_simple": "⚠️ **R{0}:** RHS negativo. Multiplicada por -1.",
             "slack": "ℹ️ **R{0}:** Restrição $\\le$. Adicionada variável de folga ${1}$.",
-            "surplus": "ℹ️ **R{0}:** Restrição $\\ge$. Adicionada variável de excesso ${1}$."
+            "surplus": "ℹ️ **R{0}:** Restrição $\\ge$. Adicionada variável de excesso ${1}$.",
+            "free_var": "ℹ️ **Variável Livre:** ${0}$ substituída por ${0}^+ - {0}^-$ (onde ${0}^+, {0}^- \\ge 0$).",
+            "neg_var": "ℹ️ **Variável ≤ 0:** ${0}$ substituída por ${0}' = -{0}$ (onde ${0}' \\ge 0$)."
         }
     },
     "library": {
@@ -260,6 +269,21 @@
                 "title": "💎 Poliedro Distorcido (3D Visual)",
                 "category": "Programação Linear (Simplex)",
                 "desc": "Problema projetado para gerar uma **região factível tridimensional complexa**.\nIdeal para testar a visualização 3D, rotação e identificação de vértices.\n\n**Restrições Geométricas:**\nMúltiplos cortes em diferentes ângulos para formar um poliedro irregular (similar a um cristal lapidado).\n\n**Objetivo:** Maximizar soma das variáveis."
+            },
+            {
+                "title": "🎯 Seleção de Projetos (Binário)",
+                "category": "Programação Inteira Binária (Branch & Bound)",
+                "desc": "Uma empresa tem 4 projetos candidatos e orçamento limitado de **$14M**. Cada projeto tem um retorno e custo.\n\n**Dados:**\n- **P1:** Retorno $8M, Custo $5M\n- **P2:** Retorno $11M, Custo $7M\n- **P3:** Retorno $6M, Custo $4M\n- **P4:** Retorno $4M, Custo $3M\n\n**Restrição:** A Equipe A pode executar no máximo 1 projeto entre P1 e P2.\n\n**Objetivo:** Maximizar retorno total. Variáveis **binárias** (0 ou 1)."
+            },
+            {
+                "title": "🚚 Logística Mista (Inteiro + Real)",
+                "category": "Programação Inteira Mista (Branch & Bound)",
+                "desc": "Uma empresa precisa definir quantos **caminhões** (x1, inteiro) e **vans** (x2, inteiro) alocar, e quanto **combustível extra** (x3, real) comprar.\n\n**Lucro:** $10/caminhão, $20/van, $5/litro extra\n\n**Restrições:**\n1. **Recurso A:** x1 + 2x2 + 0.5x3 ≤ 10\n2. **Recurso B:** 3x1 + x2 + x3 ≤ 15\n\n**Objetivo:** Maximizar lucro total. x1 e x2 inteiros, x3 real."
+            },
+            {
+                "title": "⚖️ Planejamento com Igualdade (Var. Livre no Dual)",
+                "category": "Dualidade (Variável Livre)",
+                "desc": "Problema de produção com **restrição de igualdade** que gera uma **variável livre** no Dual.\n\n**Dados:**\n- **x1:** Lucro $5, **x2:** Lucro $4\n\n**Restrições:**\n1. Matéria-prima: 6x1 + 4x2 ≤ 24\n2. Horas: x1 + 2x2 ≤ 6\n3. Demanda exata: x1 + x2 = 5 ← gera **y3 livre** no dual\n\n**Objetivo:** Maximizar lucro. Ideal para estudar dualidade com variável livre."
             }
         ]
     },

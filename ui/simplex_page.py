@@ -45,12 +45,33 @@ def simplex_ui():
 
     st.markdown(f"#### {t('simplex.obj_func')}", help=t("simplex.obj_help"))
     
+    # Variable type options
+    type_options = [t("simplex.var_real"), t("simplex.var_integer"), t("simplex.var_binary")]
+    
     obj_cols = st.columns(n_vars)
     c: List[float] = []
+    var_types: List[str] = []
     for i in range(n_vars):
         default = sv_c[i] if i < len(sv_c) else 1.0
         with obj_cols[i]:
-            c.append(st.number_input(f"**x{i+1}**", value=default, key=f"c_{i}", help=f"{t('simplex.coef_help')} x{i+1}"))
+            # Type selector
+            vtype = st.selectbox(
+                f"{t('simplex.var_type')} x{i+1}",
+                type_options,
+                index=0,
+                key=f"vtype_{i}",
+                label_visibility="collapsed"
+            )
+            var_types.append(vtype)
+            
+            # Adjust number_input based on type
+            if vtype == t("simplex.var_binary"):
+                val = st.number_input(f"**x{i+1}**", min_value=0.0, max_value=1.0, value=min(max(default, 0.0), 1.0), step=1.0, key=f"c_{i}", help=f"{t('simplex.coef_help')} x{i+1}")
+            elif vtype == t("simplex.var_integer"):
+                val = st.number_input(f"**x{i+1}**", value=float(round(default)), step=1.0, key=f"c_{i}", help=f"{t('simplex.coef_help')} x{i+1}")
+            else:
+                val = st.number_input(f"**x{i+1}**", value=default, key=f"c_{i}", help=f"{t('simplex.coef_help')} x{i+1}")
+            c.append(val)
 
     # ---------- restrições -------------------------------------------
     # ---------- restrições -------------------------------------------
@@ -111,6 +132,41 @@ def simplex_ui():
         solve_clicked = st.button(t("simplex.btn_solve"), type="primary", width="stretch")
 
     if solve_clicked:
+        # Derive int_vars from var_types
+        int_vars = []
+        binary_vars = []
+        for i, vt in enumerate(var_types):
+            if vt == t("simplex.var_integer"):
+                int_vars.append(i)
+            elif vt == t("simplex.var_binary"):
+                int_vars.append(i)
+                binary_vars.append(i)
+        
+        # If there are integer/binary vars, redirect to B&B
+        if int_vars:
+            # Add binary upper-bound constraints (x_i <= 1) for binary vars
+            A_for_bb = [row[:] for row in A]
+            b_for_bb = list(b)
+            for bi in binary_vars:
+                bound_row = [0.0] * n_vars
+                bound_row[bi] = 1.0
+                A_for_bb.append(bound_row)
+                b_for_bb.append(1.0)
+            
+            # Store problem for B&B page
+            st.session_state["problem"] = {
+                "c": c,
+                "A": A_for_bb,
+                "b": b_for_bb,
+                "maximize": is_max,
+                "int_vars": int_vars,
+                "var_types": [("real" if vt == t("simplex.var_real") else "integer" if vt == t("simplex.var_integer") else "binary") for vt in var_types]
+            }
+            st.session_state["pending_toast"] = t("simplex.auto_bab_info")
+            st.session_state["pending_redirect"] = "bab"
+            st.rerun()
+            return
+        
         # Pré-processar sentidos: converter tudo para ≤
         A_conv, b_conv = [], []
         for row, rhs, sn in zip(A, b, senses):

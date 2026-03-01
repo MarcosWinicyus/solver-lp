@@ -71,6 +71,11 @@
         "coef_help": "Coefficient of variable",
         "rhs_label": "**Value**",
         "type_label": "**Type**",
+        "var_type": "Type",
+        "var_real": "Real",
+        "var_integer": "Integer",
+        "var_binary": "Binary",
+        "auto_bab_info": "Integer/binary variables detected. The problem will be solved using **Branch & Bound** to ensure solution integrality.",
         "results": {
             "unbounded": "⚠️ **Unbounded Problem** - The objective function grows infinitely",
             "infeasible": "❌ **No optimal solution found** (Infeasible)",
@@ -183,7 +188,9 @@
         "btn_solve_simplex": "📐 Solve with Simplex",
         "btn_solve_bb": "🌳 Solve with B&B",
         "primal": "Primal",
-        "dual": "Dual"
+        "dual": "Dual",
+        "not_standard_form": "⚠️ The Dual problem has variables with domain **≤ 0** or **free (unrestricted)**, therefore it is **not in Standard Form**. It must be converted before solving with Simplex.",
+        "btn_convert_std": "📝 Convert to Standard Form"
     },
     "sensitivity": {
         "title": "📊 Sensitivity Analysis",
@@ -224,7 +231,9 @@
             "rhs_neg": "⚠️ **R{0}:** Negative RHS. Multiplied by -1 and sign inverted.",
             "rhs_neg_simple": "⚠️ **R{0}:** Negative RHS. Multiplied by -1.",
             "slack": "ℹ️ **R{0}:** $\\le$ Constraint. Added slack variable ${1}$.",
-            "surplus": "ℹ️ **R{0}:** $\\ge$ Constraint. Added surplus variable ${1}$."
+            "surplus": "ℹ️ **R{0}:** $\\ge$ Constraint. Added surplus variable ${1}$.",
+            "free_var": "ℹ️ **Free Variable:** ${0}$ replaced by ${0}^+ - {0}^-$ (where ${0}^+, {0}^- \\ge 0$).",
+            "neg_var": "ℹ️ **Variable ≤ 0:** ${0}$ replaced by ${0}' = -{0}$ (where ${0}' \\ge 0$)."
         }
     },
     "library": {
@@ -260,6 +269,21 @@
                 "title": "💎 Distorted Polyhedron (3D Visual)",
                 "category": "Linear Programming (Simplex)",
                 "desc": "Problem designed to generate a **complex three-dimensional feasible region**.\nIdeal for testing 3D visualization, rotation, and vertex identification.\n\n**Geometric Constraints:**\nMultiple cuts at different angles to form an irregular polyhedron (similar to a cut crystal).\n\n**Objective:** Maximize sum of variables."
+            },
+            {
+                "title": "🎯 Project Selection (Binary)",
+                "category": "Binary Integer Programming (Branch & Bound)",
+                "desc": "A company has 4 candidate projects and a limited budget of **$14M**. Each project has a return and cost.\n\n**Data:**\n- **P1:** Return $8M, Cost $5M\n- **P2:** Return $11M, Cost $7M\n- **P3:** Return $6M, Cost $4M\n- **P4:** Return $4M, Cost $3M\n\n**Constraint:** Team A can execute at most 1 project between P1 and P2.\n\n**Objective:** Maximize total return. **Binary** variables (0 or 1)."
+            },
+            {
+                "title": "🚚 Mixed Logistics (Integer + Real)",
+                "category": "Mixed Integer Programming (Branch & Bound)",
+                "desc": "A company needs to decide how many **trucks** (x1, integer) and **vans** (x2, integer) to allocate, and how much **extra fuel** (x3, real) to purchase.\n\n**Profit:** $10/truck, $20/van, $5/extra liter\n\n**Constraints:**\n1. **Resource A:** x1 + 2x2 + 0.5x3 ≤ 10\n2. **Resource B:** 3x1 + x2 + x3 ≤ 15\n\n**Objective:** Maximize total profit. x1 and x2 integers, x3 real."
+            },
+            {
+                "title": "⚖️ Planning with Equality (Free Var. in Dual)",
+                "category": "Duality (Free Variable)",
+                "desc": "Production problem with an **equality constraint** that generates a **free variable** in the Dual.\n\n**Data:**\n- **x1:** Profit $5, **x2:** Profit $4\n\n**Constraints:**\n1. Raw material: 6x1 + 4x2 ≤ 24\n2. Hours: x1 + 2x2 ≤ 6\n3. Exact demand: x1 + x2 = 5 ← generates **y3 free** in dual\n\n**Objective:** Maximize profit. Ideal for studying duality with free variables."
             }
         ]
     },

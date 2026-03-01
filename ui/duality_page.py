@@ -2,6 +2,7 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
+from ui.helpers import _store_problem, _load_problem, number_emojis, render_md_bold
 from ui.library_page import load_problem_and_redirect
 from ui.lang import t
 
@@ -9,8 +10,8 @@ def duality_ui():
     st.markdown(f"<h1 style='text-align: center;'>{t('duality.title')}</h1>", unsafe_allow_html=True)
     st.markdown(f"""
     <div style='text-align: center;'>
-        {t('duality.subtitle')}<br>
-        {t('duality.theorem')}
+        {render_md_bold(t('duality.subtitle'))}<br>
+        {render_md_bold(t('duality.theorem'))}
     </div>
     """, unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
@@ -38,12 +39,35 @@ def duality_ui():
     is_max = (maximize == t("simplex.maximize"))
 
     st.markdown(f"#### {t('simplex.obj_func')} ($Z$)")
+    
+    # Variable type options
+    type_options = [t("simplex.var_real"), t("simplex.var_integer"), t("simplex.var_binary")]
+    saved_var_types = saved.get("var_types", [])
+    vt_map = {"real": 0, "integer": 1, "binary": 2}
+    
     cols_c = st.columns(n_vars)
     c = []
+    var_types = []
     for i in range(n_vars):
         with cols_c[i]:
+            # Default type from saved
+            default_type_idx = vt_map.get(saved_var_types[i], 0) if i < len(saved_var_types) else 0
+            vtype = st.selectbox(
+                f"{t('simplex.var_type')} x{i+1}",
+                type_options,
+                index=default_type_idx,
+                key=f"p_vtype_{i}",
+                label_visibility="collapsed"
+            )
+            var_types.append(vtype)
+            
             val_def = sv_c[i] if i < len(sv_c) else 1.0
-            val = st.number_input(f"**x{i+1}**", value=val_def, key=f"p_c_{i}")
+            if vtype == t("simplex.var_binary"):
+                val = st.number_input(f"**x{i+1}**", min_value=0.0, max_value=1.0, value=min(max(val_def, 0.0), 1.0), step=1.0, key=f"p_c_{i}")
+            elif vtype == t("simplex.var_integer"):
+                val = st.number_input(f"**x{i+1}**", value=float(round(val_def)), step=1.0, key=f"p_c_{i}")
+            else:
+                val = st.number_input(f"**x{i+1}**", value=val_def, key=f"p_c_{i}")
             c.append(val)
 
     st.markdown(f"#### {t('simplex.constraints')}")
@@ -62,7 +86,10 @@ def duality_ui():
                 row.append(val)
         
         with cols[n_vars]:
-            sense = st.selectbox(t("simplex.type_label"), ["≤", "=", "≥"], index=0, key=f"p_sense_{r}")
+            sense_options = ["≤", "=", "≥"]
+            saved_constraint_types = saved.get("constraint_types", [])
+            default_sense_idx = sense_options.index(saved_constraint_types[r]) if r < len(saved_constraint_types) and saved_constraint_types[r] in sense_options else 0
+            sense = st.selectbox(t("simplex.type_label"), sense_options, index=default_sense_idx, key=f"p_sense_{r}")
             senses.append(sense)
             
         with cols[n_vars+1]:
@@ -117,7 +144,8 @@ def duality_ui():
             "c_original": c,
             "A_original": A,
             "b_original": b,
-            "senses_original": senses
+            "senses_original": senses,
+            "var_types_original": [("real" if vt == t("simplex.var_real") else "integer" if vt == t("simplex.var_integer") else "binary") for vt in var_types]
         }
 
     # --- Exibição do Resultado (Persistente) ---
@@ -149,6 +177,7 @@ def duality_ui():
                 "b": res['b_original'],
                 "maximize": res['is_max'],
                 "int_vars": [],
+                "var_types": res.get('var_types_original', []),
                 "constraint_types": res['senses_original']
             }
             
@@ -178,19 +207,43 @@ def duality_ui():
             st.divider()
             st.markdown(t("duality.solve_label"))
             
-            # Preparar dados para solver
-            dual_problem_data = {
-                "c": res['c_dual'],
-                "A": res['A_dual'], 
-                "b": res['b_dual'],
-                "maximize": res['dual_is_max'],
-                "int_vars": [],
-                "constraint_types": [res['dual_sense_default']] * res["n_constr_dual"]
-            }
+            # Verificar se há variáveis fora da forma padrão (≤ 0 ou livres)
+            has_non_standard = any(dom in ("≤ 0", "Livre") for dom in res['dual_vars_domain'])
             
-            if st.button(t("duality.btn_solve_simplex"), type="primary", key="btn_solve_dual_simplex"):
-                load_problem_and_redirect({
-                    "title": "Problema Dual", # This title is internal
-                    "target_page": "simplex",
-                    "data": dual_problem_data
-                })
+            if has_non_standard:
+                st.warning(t("duality.not_standard_form"))
+                
+                # Botão do Simplex desabilitado
+                st.button(t("duality.btn_solve_simplex"), type="primary", key="btn_solve_dual_simplex", disabled=True)
+                
+                # Botão para converter na Forma Padrão
+                dual_problem_data = {
+                    "c": res['c_dual'],
+                    "A": res['A_dual'], 
+                    "b": res['b_dual'],
+                    "maximize": res['dual_is_max'],
+                    "int_vars": [],
+                    "constraint_types": [res['dual_sense_default']] * res["n_constr_dual"],
+                    "dual_vars_domain": res['dual_vars_domain']
+                }
+                if st.button(t("duality.btn_convert_std"), type="primary", key="btn_dual_to_std"):
+                    st.session_state["problem"] = dual_problem_data
+                    st.session_state["pending_redirect"] = "std_form"
+                    st.rerun()
+            else:
+                # Preparar dados para solver normalmente
+                dual_problem_data = {
+                    "c": res['c_dual'],
+                    "A": res['A_dual'], 
+                    "b": res['b_dual'],
+                    "maximize": res['dual_is_max'],
+                    "int_vars": [],
+                    "constraint_types": [res['dual_sense_default']] * res["n_constr_dual"]
+                }
+                
+                if st.button(t("duality.btn_solve_simplex"), type="primary", key="btn_solve_dual_simplex"):
+                    load_problem_and_redirect({
+                        "title": "Problema Dual",
+                        "target_page": "simplex",
+                        "data": dual_problem_data
+                    })

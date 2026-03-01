@@ -27,7 +27,8 @@ def library_page():
                 "A": [[2.0, 3.0], [1.0, 0.5]],
                 "b": [120.0, 50.0],
                 "maximize": True,
-                "int_vars": []
+                "int_vars": [],
+                "var_types": ["real", "real"]
             } 
         },
         # Problema da Dieta
@@ -38,7 +39,8 @@ def library_page():
                 "A": [[-4.0, -2.0], [-2.0, -5.0]], # Convertido para <= (multiplicado por -1)
                 "b": [-20.0, -30.0],
                 "maximize": False, # Minimizar
-                "int_vars": []
+                "int_vars": [],
+                "var_types": ["real", "real"]
             }
         },
         # Problema da Mochila
@@ -49,7 +51,8 @@ def library_page():
                 "A": [[2.0, 4.0, 6.0, 9.0]],
                 "b": [15.0],
                 "maximize": True,
-                "int_vars": [0, 1, 2, 3] 
+                "int_vars": [0, 1, 2, 3],
+                "var_types": ["integer", "integer", "integer", "integer"]
             }
         },
         # Corte de Estoque
@@ -60,7 +63,8 @@ def library_page():
                 "A": [[1.0, 1.0], [5.0, 9.0]],
                 "b": [6.0, 45.0],
                 "maximize": True,
-                "int_vars": [0, 1]
+                "int_vars": [0, 1],
+                "var_types": ["integer", "integer"]
             }
         },
         # Poliedro Distorcido
@@ -78,7 +82,55 @@ def library_page():
                 ],
                 "b": [10.0, 6.0, 6.0, 6.0, 12.0, 12.0],
                 "maximize": True,
-                "int_vars": []
+                "int_vars": [],
+                "var_types": ["real", "real", "real"]
+            }
+        },
+        # Seleção de Projetos (Binário)
+        {
+            "target_page": "bab",
+            "data": {
+                "c": [8.0, 11.0, 6.0, 4.0],
+                "A": [
+                    [5.0, 7.0, 4.0, 3.0],   # Orçamento
+                    [1.0, 1.0, 0.0, 0.0],    # Equipe A max 1 projeto
+                ],
+                "b": [14.0, 1.0],
+                "maximize": True,
+                "int_vars": [0, 1, 2, 3],
+                "var_types": ["binary", "binary", "binary", "binary"]
+            }
+        },
+        # Logística Mista (Inteiro + Real)
+        {
+            "target_page": "bab",
+            "data": {
+                "c": [10.0, 20.0, 5.0],
+                "A": [
+                    [1.0, 2.0, 0.5],   # Recurso A
+                    [3.0, 1.0, 1.0],   # Recurso B
+                ],
+                "b": [10.0, 15.0],
+                "maximize": True,
+                "int_vars": [0, 1],
+                "var_types": ["integer", "integer", "real"]
+            }
+        },
+        # Planejamento de Produção com Restrição de Igualdade (Dualidade com var livre)
+        {
+            "target_page": "duality",
+            "data": {
+                "c": [5.0, 4.0],
+                "A": [
+                    [6.0, 4.0],    # Matéria-prima (≤)
+                    [1.0, 2.0],    # Horas de trabalho (≤)
+                    [1.0, 1.0],    # Demanda exata (=) → gera variável livre no dual
+                ],
+                "b": [24.0, 6.0, 5.0],
+                "maximize": True,
+                "int_vars": [],
+                "var_types": ["real", "real"],
+                "constraint_types": ["≤", "≤", "="]
             }
         }
     ]

@@ -71,6 +71,11 @@
         "coef_help": "Coeficiente de la variable",
         "rhs_label": "**Valor**",
         "type_label": "**Tipo**",
+        "var_type": "Tipo",
+        "var_real": "Real",
+        "var_integer": "Entero",
+        "var_binary": "Binario",
+        "auto_bab_info": "Variables enteras/binarias detectadas. El problema se resolverá con **Branch & Bound** para garantizar la integralidad de la solución.",
         "results": {
             "unbounded": "⚠️ **Problema Ilimitado** - La función objetivo crece infinitamente",
             "infeasible": "❌ **No se encontró solución óptima** (Infactible)",
@@ -183,7 +188,9 @@
         "btn_solve_simplex": "📐 Resolver con Simplex",
         "btn_solve_bb": "🌳 Resolver con B&B",
         "primal": "Primal",
-        "dual": "Dual"
+        "dual": "Dual",
+        "not_standard_form": "⚠️ El problema Dual tiene variables con dominio **≤ 0** o **libres (irrestritas)**, por lo tanto **no está en Forma Estándar**. Es necesario convertirlo antes de resolver con Simplex.",
+        "btn_convert_std": "📝 Convertir a Forma Estándar"
     },
     "sensitivity": {
         "title": "📊 Análisis de Sensibilidad",
@@ -224,7 +231,9 @@
             "rhs_neg": "⚠️ **R{0}:** RHS negativo. Multiplicado por -1 e invertido.",
             "rhs_neg_simple": "⚠️ **R{0}:** RHS negativo. Multiplicado por -1.",
             "slack": "ℹ️ **R{0}:** Restricción $\\le$. Variable de holgura ${1}$ agregada.",
-            "surplus": "ℹ️ **R{0}:** Restricción $\\ge$. Variable de exceso ${1}$ agregada."
+            "surplus": "ℹ️ **R{0}:** Restricción $\\ge$. Variable de exceso ${1}$ agregada.",
+            "free_var": "ℹ️ **Variable Libre:** ${0}$ sustituida por ${0}^+ - {0}^-$ (donde ${0}^+, {0}^- \\ge 0$).",
+            "neg_var": "ℹ️ **Variable ≤ 0:** ${0}$ sustituida por ${0}' = -{0}$ (donde ${0}' \\ge 0$)."
         }
     },
     "library": {
@@ -260,6 +269,21 @@
                 "title": "💎 Poliedro Distorsionado (Visual 3D)",
                 "category": "Programación Lineal (Simplex)",
                 "desc": "Problema diseñado para generar una **región factible 3D compleja**.\nIdeal para probar visualización 3D y rotación.\n\n**Restricciones:**\nMúltiples cortes en diferentes ángulos.\n\n**Objetivo:** Maximizar suma de variables."
+            },
+            {
+                "title": "🎯 Selección de Proyectos (Binario)",
+                "category": "Programación Entera Binaria (Branch & Bound)",
+                "desc": "Una empresa tiene 4 proyectos candidatos y presupuesto limitado de **$14M**. Cada proyecto tiene un retorno y costo.\n\n**Datos:**\n- **P1:** Retorno $8M, Costo $5M\n- **P2:** Retorno $11M, Costo $7M\n- **P3:** Retorno $6M, Costo $4M\n- **P4:** Retorno $4M, Costo $3M\n\n**Restricción:** El Equipo A puede ejecutar máximo 1 proyecto entre P1 y P2.\n\n**Objetivo:** Maximizar retorno total. Variables **binarias** (0 o 1)."
+            },
+            {
+                "title": "🚚 Logística Mixta (Entero + Real)",
+                "category": "Programación Entera Mixta (Branch & Bound)",
+                "desc": "Una empresa necesita definir cuántos **camiones** (x1, entero) y **furgonetas** (x2, entero) asignar, y cuánto **combustible extra** (x3, real) comprar.\n\n**Beneficio:** $10/camión, $20/furgoneta, $5/litro extra\n\n**Restricciones:**\n1. **Recurso A:** x1 + 2x2 + 0.5x3 ≤ 10\n2. **Recurso B:** 3x1 + x2 + x3 ≤ 15\n\n**Objetivo:** Maximizar beneficio total. x1 y x2 enteros, x3 real."
+            },
+            {
+                "title": "⚖️ Planificación con Igualdad (Var. Libre en Dual)",
+                "category": "Dualidad (Variable Libre)",
+                "desc": "Problema de producción con una **restricción de igualdad** que genera una **variable libre** en el Dual.\n\n**Datos:**\n- **x1:** Beneficio $5, **x2:** Beneficio $4\n\n**Restricciones:**\n1. Materia prima: 6x1 + 4x2 ≤ 24\n2. Horas: x1 + 2x2 ≤ 6\n3. Demanda exacta: x1 + x2 = 5 ← genera **y3 libre** en dual\n\n**Objetivo:** Maximizar beneficio. Ideal para estudiar dualidad con variable libre."
             }
         ]
     },

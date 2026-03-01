@@ -4,14 +4,14 @@ import streamlit as st
 import pandas as pd
 
 from core.simplex_solver import SimplexSolver
-from .helpers import number_emojis
+from .helpers import number_emojis, render_md_bold
 from ui.lang import t
 
 def sensitivity_ui():
     st.markdown(f"<h1 style='text-align: center;'>{t('sensitivity.title')}</h1>", unsafe_allow_html=True)
     st.markdown(f"""
     <div style='text-align: center;'>
-        {t('sensitivity.subtitle')}
+        {render_md_bold(t('sensitivity.subtitle'))}
     </div>
     """, unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)

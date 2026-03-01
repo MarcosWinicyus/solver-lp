@@ -1,4 +1,11 @@
 import streamlit as st
+import re
+
+def render_md_bold(text: str) -> str:
+    """Converte marcadores markdown ** para tags <b> para exibição em blocos HTML."""
+    if not isinstance(text, str):
+        return text
+    return re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)
 
 def _store_problem(c, A, b, int_vars=None):
     st.session_state["problem"] = {"c": c, "A": A, "b": b, "int_vars": int_vars or []}

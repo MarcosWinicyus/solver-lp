@@ -11,10 +11,15 @@ def bab_ui():
     st.markdown(f"<p style='text-align: center; color: #888;'>{t('bab.subtitle')}</p>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
+    # Exibir toast de redirecionamento (vindo do Simplex)
+    if "pending_toast" in st.session_state:
+        st.toast(st.session_state.pop("pending_toast"), icon="ℹ️")
+
     # Carregar estado anterior se existir
     saved = st.session_state.get("problem", {})
     saved_c, saved_A, saved_b = saved.get("c", []), saved.get("A", []), saved.get("b", [])
     saved_int = saved.get("int_vars", [])
+    saved_var_types = saved.get("var_types", [])
 
     # Layout de entrada similar ao Simplex
     col_counts = st.columns(3)
@@ -35,27 +40,44 @@ def bab_ui():
     label_obj = t("common.obj_max") if is_max else t("common.obj_min")
     st.markdown(f"#### {label_obj}", help=t("simplex.obj_help"))
     
+    # Variable type options
+    type_options = [t("simplex.var_real"), t("simplex.var_integer"), t("simplex.var_binary")]
+    
     obj_cols = st.columns(n_vars)
     c = []
+    var_types = []
+    int_vars = []
     for i in range(n_vars):
         default = saved_c[i] if i < len(saved_c) else 1.0
+        # Default type from saved var_types, then from int_vars, fallback to Integer
+        if i < len(saved_var_types):
+            vt_map = {"real": 0, "integer": 1, "binary": 2}
+            default_type_idx = vt_map.get(saved_var_types[i], 1)
+        elif saved_int:
+            default_type_idx = 1 if (i in saved_int) else 0
+        else:
+            default_type_idx = 1  # Default to Integer for B&B page
         with obj_cols[i]:
-            c.append(st.number_input(f"**x{i+1}**", value=default, key=f"bb_c_{i}", help=f"{t('simplex.coef_help')} x{i+1}"))
-
-    # Seleção de variáveis inteiras
-    st.markdown(t("bab.int_vars"), help=t("bab.int_vars_help"))
-    
-    int_cols = st.columns(n_vars)
-    int_vars = []
-    # Se não houver estado salvo, todas as variáveis vêm marcadas como inteiras por padrão
-    all_indices = list(range(n_vars))
-    default_int_vars = saved_int if "int_vars" in saved else all_indices
-    
-    for i in range(n_vars):
-        with int_cols[i]:
-            is_int = st.checkbox(f"**x{i+1}** {t('bab.chk_int')}", value=(i in default_int_vars), key=f"int_{i}")
-            if is_int:
+            # Type selector
+            vtype = st.selectbox(
+                f"{t('simplex.var_type')} x{i+1}",
+                type_options,
+                index=default_type_idx,
+                key=f"bb_vtype_{i}",
+                label_visibility="collapsed"
+            )
+            var_types.append(vtype)
+            
+            # Adjust number_input based on type
+            if vtype == t("simplex.var_binary"):
+                val = st.number_input(f"**x{i+1}**", min_value=0.0, max_value=1.0, value=min(max(default, 0.0), 1.0), step=1.0, key=f"bb_c_{i}", help=f"{t('simplex.coef_help')} x{i+1}")
                 int_vars.append(i)
+            elif vtype == t("simplex.var_integer"):
+                val = st.number_input(f"**x{i+1}**", value=float(round(default)), step=1.0, key=f"bb_c_{i}", help=f"{t('simplex.coef_help')} x{i+1}")
+                int_vars.append(i)
+            else:
+                val = st.number_input(f"**x{i+1}**", value=default, key=f"bb_c_{i}", help=f"{t('simplex.coef_help')} x{i+1}")
+            c.append(val)
 
     # Restrições
     # Restrições
