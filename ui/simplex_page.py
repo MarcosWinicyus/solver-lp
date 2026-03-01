@@ -287,15 +287,6 @@ def simplex_ui():
             else:
                 # Modo Não-Didático: Apenas Tableau Limpo
                 
-                # Mostrar razão e linha aplicada da iteração ANTERIOR (transição)
-                if idx > 0:
-                    prev_piv = solver.pivots[idx-1]
-                    if prev_piv != (-1, -1):
-                        pr, pc = prev_piv
-                        prev_tbl = solver.tableaux[idx-1]
-                        pivot_val = prev_tbl[pr, pc]
-                        st.markdown(f"**{t('simplex.results.applied_row')}** {pr} | **{t('simplex.results.pivot_element')}** {pivot_val:.3f}")
-                
                 st.markdown(f"##### **{step_text}**")
                 # Passar basis_vars=None para esconder a seção "Status da Base Atual"
                 show_tableau_with_basis_info(tbl, basis_vars=None, pivot=piv, show_legend=False)

@@ -37,7 +37,7 @@
         "title": "Solver LP",
         "subtitle": "Plataforma Didática de Otimização Linear e Inteira",
         "simplex_title": "📐 Simplex",
-        "simplex_desc": "Resolução passo a passo com <b>visualização 3D/2D</b> interativa, análise de tableau e múltiplas iterações.",
+        "simplex_desc": "Resolução passo a passo com **visualização 3D/2D** interativa, análise de tableau e múltiplas iterações.",
         "bab_title": "🌳 Branch & Bound",
         "bab_desc": "Algoritmo para problemas inteiros (PLI) com árvore de decisão interativa e estratégias de busca em profundidade/largura.",
         "duality_title": "🔄 Dualidade",
@@ -174,7 +174,7 @@
     "duality": {
         "title": "🔄 Dualidade (Conversor Primal-Dual)",
         "subtitle": "Ferramenta para converter problemas Primais em seus equivalentes Duais.",
-        "theorem": "<b>Teorema da Dualidade:</b> Primal <b>Max</b> Z = cx (Ax ≤ b) ↔ Dual <b>Min</b> W = by (Aᵀy ≥ c)",
+        "theorem": "**Teorema da Dualidade:** Primal **Max** Z = cx (Ax ≤ b) ↔ Dual **Min** W = by (Aᵀy ≥ c)",
         "primal_def": "1. Definição do Problema Primal",
         "btn_convert": "🔄 Converter para DUAL",
         "result_title": "2. Problema Dual Resultante",
@@ -187,7 +187,7 @@
     },
     "sensitivity": {
         "title": "📊 Análise de Sensibilidade",
-        "subtitle": "Explore como mudanças nos parâmetros (<b>Coeficientes da Função Objetivo</b> e <b>Valores do Lado Direito</b>) afetam a solução ótima e a viabilidade do problema.",
+        "subtitle": "Explore como mudanças nos parâmetros (**Coeficientes da Função Objetivo** e **Valores do Lado Direito**) afetam a solução ótima e a viabilidade do problema.",
         "func_obj": "#### 📝 **Função Objetivo**",
         "btn_analyze": "🔎 **Gerar Relatório de Sensibilidade**",
         "error_optimal": "❌ O problema não possui solução ótima finita. Não é possível realizar análise de sensibilidade.",
@@ -211,7 +211,7 @@
     },
     "standard": {
         "title": "📝 Conversor para Forma Padrão",
-        "subtitle": "Transforme problemas de Programação Linear para a <b>Forma Padrão</b>:",
+        "subtitle": "Transforme problemas de Programação Linear para a **Forma Padrão**:",
         "subtitle_details": "<i>(Maximização, Restrições de Igualdade e RHS não-negativo)</i>",
         "btn_convert": "🔄 **Converter para Forma Padrão**",
         "details": "ℹ️ **Detalhes da Conversão**",

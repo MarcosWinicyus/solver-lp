@@ -37,7 +37,7 @@
         "title": "Solver LP",
         "subtitle": "Plataforma Didáctica de Optimización Lineal y Entera",
         "simplex_title": "📐 Simplex",
-        "simplex_desc": "Resolución paso a paso con <b>visualización interactiva 3D/2D</b>, análisis de tableau y múltiples iteraciones.",
+        "simplex_desc": "Resolución paso a paso con **visualización interactiva 3D/2D**, análisis de tableau y múltiples iteraciones.",
         "bab_title": "🌳 Branch & Bound",
         "bab_desc": "Algoritmo para problemas enteros (PLI) con árbol de decisión interactivo y estrategias de búsqueda en profundidad/anchura.",
         "duality_title": "🔄 Dualidad",
@@ -174,7 +174,7 @@
     "duality": {
         "title": "🔄 Dualidad (Convertidor Primal-Dual)",
         "subtitle": "Herramienta para convertir problemas Primales a equivalentes Duales.",
-        "theorem": "<b>Teorema de Dualidad:</b> Primal <b>Max</b> Z = cx (Ax ≤ b) ↔ Dual <b>Min</b> W = by (Aᵀy ≥ c)",
+        "theorem": "**Teorema de Dualidad:** Primal **Max** Z = cx (Ax ≤ b) ↔ Dual **Min** W = by (Aᵀy ≥ c)",
         "primal_def": "1. Definición del Problema Primal",
         "btn_convert": "🔄 Convertir a DUAL",
         "result_title": "2. Problema Dual Resultante",
@@ -187,7 +187,7 @@
     },
     "sensitivity": {
         "title": "📊 Análisis de Sensibilidad",
-        "subtitle": "Explore cómo cambios en parámetros (<b>Coeficientes Función Objetivo</b> y <b>Valores RHS</b>) afectan la solución óptima y factibilidad.",
+        "subtitle": "Explore cómo cambios en parámetros (**Coeficientes Función Objetivo** y **Valores RHS**) afectan la solución óptima y factibilidad.",
         "func_obj": "#### 📝 **Función Objetivo**",
         "btn_analyze": "🔎 **Generar Informe de Sensibilidad**",
         "error_optimal": "❌ El problema no tiene solución óptima finita. No se puede realizar análisis.",
@@ -211,7 +211,7 @@
     },
     "standard": {
         "title": "📝 Convertidor Forma Estándar",
-        "subtitle": "Transforme problemas de Programación Lineal a <b>Forma Estándar</b>:",
+        "subtitle": "Transforme problemas de Programación Lineal a **Forma Estándar**:",
         "subtitle_details": "<i>(Maximización, Restricciones de Igualdad y RHS no negativo)</i>",
         "btn_convert": "🔄 **Convertir a Forma Estándar**",
         "details": "ℹ️ **Detalles de Conversión**",

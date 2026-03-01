@@ -147,7 +147,12 @@ REDIRECT_MAP = {
     "📐 Método Simplex": p_simplex,
     "🌳 Branch & Bound": p_bab,
     "Simplex": p_simplex,
-    "Branch & Bound": p_bab
+    "Branch & Bound": p_bab,
+    "duality": p_duality,
+    "sensitivity": p_sensitivity,
+    "std_form": p_std_form,
+    "library": p_library,
+    "history": p_history
 }
 
 if "pending_redirect" in st.session_state:

@@ -37,7 +37,7 @@
         "title": "Solver LP",
         "subtitle": "Didactic Platform for Linear and Integer Optimization",
         "simplex_title": "📐 Simplex",
-        "simplex_desc": "Step-by-step resolution with interactive <b>3D/2D visualization</b>, tableau analysis, and multiple iterations.",
+        "simplex_desc": "Step-by-step resolution with interactive **3D/2D visualization**, tableau analysis, and multiple iterations.",
         "bab_title": "🌳 Branch & Bound",
         "bab_desc": "Algorithm for integer problems (IP) with interactive decision tree and depth/breadth search strategies.",
         "duality_title": "🔄 Duality",
@@ -174,7 +174,7 @@
     "duality": {
         "title": "🔄 Duality (Primal-Dual Converter)",
         "subtitle": "Tool to convert Primal problems into their Dual equivalents.",
-        "theorem": "<b>Duality Theorem:</b> Primal <b>Max</b> Z = cx (Ax ≤ b) ↔ Dual <b>Min</b> W = by (Aᵀy ≥ c)",
+        "theorem": "**Duality Theorem:** Primal **Max** Z = cx (Ax ≤ b) ↔ Dual **Min** W = by (Aᵀy ≥ c)",
         "primal_def": "1. Primal Problem Definition",
         "btn_convert": "🔄 Convert to DUAL",
         "result_title": "2. Resulting Dual Problem",
@@ -187,7 +187,7 @@
     },
     "sensitivity": {
         "title": "📊 Sensitivity Analysis",
-        "subtitle": "Explore how parameter changes (<b>Objective Function Coefficients</b> and <b>RHS Values</b>) affect the optimal solution and feasibility.",
+        "subtitle": "Explore how parameter changes (**Objective Function Coefficients** and **RHS Values**) affect the optimal solution and feasibility.",
         "func_obj": "#### 📝 **Objective Function**",
         "btn_analyze": "🔎 **Generate Sensitivity Report**",
         "error_optimal": "❌ The problem has no finite optimal solution. Sensitivity analysis cannot be performed.",
@@ -211,7 +211,7 @@
     },
     "standard": {
         "title": "📝 Standard Form Converter",
-        "subtitle": "Transform Linear Programming problems into <b>Standard Form</b>:",
+        "subtitle": "Transform Linear Programming problems into **Standard Form**:",
         "subtitle_details": "<i>(Maximization, Equality Constraints, and Non-negative RHS)</i>",
         "btn_convert": "🔄 **Convert to Standard Form**",
         "details": "ℹ️ **Conversion Details**",

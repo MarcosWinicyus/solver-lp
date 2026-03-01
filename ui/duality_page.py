@@ -139,6 +139,25 @@ def duality_ui():
                 lhs = " + ".join([f"{res['A_original'][i][j]}x_{j+1}" for j in range(len(res['c_original']))])
                 st.latex(f"{lhs} \ {res['senses_original'][i]} \ {res['b_original'][i]}")
             st.latex("x_j \ge 0")
+            
+            st.divider()
+            st.markdown(t("duality.solve_label"))
+            
+            primal_problem_data = {
+                "c": res['c_original'],
+                "A": res['A_original'], 
+                "b": res['b_original'],
+                "maximize": res['is_max'],
+                "int_vars": [],
+                "constraint_types": res['senses_original']
+            }
+            
+            if st.button(t("duality.btn_solve_simplex"), type="primary", key="btn_solve_primal_simplex"):
+                load_problem_and_redirect({
+                    "title": "Problema Primal",
+                    "target_page": "simplex",
+                    "data": primal_problem_data
+                })
                 
         with col_dual:
             st.markdown(f"##### {t('duality.dual')}")
@@ -159,9 +178,6 @@ def duality_ui():
             st.divider()
             st.markdown(t("duality.solve_label"))
             
-            # Botões dentro da coluna do Dual
-            b_col1, b_col2 = st.columns(2)
-            
             # Preparar dados para solver
             dual_problem_data = {
                 "c": res['c_dual'],
@@ -172,18 +188,9 @@ def duality_ui():
                 "constraint_types": [res['dual_sense_default']] * res["n_constr_dual"]
             }
             
-            with b_col1:
-                if st.button(t("duality.btn_solve_simplex"), type="primary", key="btn_solve_dual_simplex"):
-                    load_problem_and_redirect({
-                        "title": "Problema Dual", # This title is internal
-                        "target_page": "simplex",
-                        "data": dual_problem_data
-                    })
-
-            with b_col2:
-                if st.button(t("duality.btn_solve_bb"), type="primary", key="btn_solve_dual_bb"):
-                    load_problem_and_redirect({
-                        "title": "Problema Dual",
-                        "target_page": "bab",
-                        "data": dual_problem_data
-                    })
+            if st.button(t("duality.btn_solve_simplex"), type="primary", key="btn_solve_dual_simplex"):
+                load_problem_and_redirect({
+                    "title": "Problema Dual", # This title is internal
+                    "target_page": "simplex",
+                    "data": dual_problem_data
+                })
